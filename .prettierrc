@@ -1,0 +1,8 @@
+{
+  "overrides": [
+    {
+      "files": [".prettierrc", ".czrc", ".lintstagedrc"],
+      "options": { "parser": "json" }
+    }
+  ]
+}
