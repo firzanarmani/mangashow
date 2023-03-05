@@ -1,4 +1,4 @@
-import { Button } from "ui";
+import { Button } from "viewer";
 
 export default function Web() {
   return (
