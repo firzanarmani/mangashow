@@ -1,0 +1,50 @@
+.overlay-controls {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.container-controls {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 12rem;
+}
+
+.btn-controls {
+  background-color: rgba(256, 256, 256, 0.1);
+  color: black;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-controls:hover:enabled {
+  background-color: rgba(256, 256, 256, 0.2);
+  color: white;
+}
+
+.btn-controls:disabled {
+  cursor: default;
+  visibility: hidden;
+}
+
+.btn-page {
+  display: flex;
+  flex: 1 1 25%;
+}
+
+.btn-step {
+  display: flex;
+  flex: 1 1 75%;
+}
+
+.controls-previous {
+  left: 0;
+}
+
+.controls-next {
+  right: 0;
+}
