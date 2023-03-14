@@ -18,8 +18,8 @@ export type Shape = {
   height: number;
   rotation?: number;
   fill: string;
-  stroke: string;
-  strokeWidth: number;
+  stroke?: string;
+  strokeWidth?: number;
   name: string;
   visible: boolean;
   id: string;
