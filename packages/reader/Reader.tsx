@@ -73,40 +73,81 @@ export function Reader({
     }
   }
 
+  function unravelAll() {
+    setCurrentStep((prevStep) => {
+      setShapeVisible((prev) => {
+        return prev.map(() => false);
+      });
+      return readerObject.pages[currentPageNo].shapes.length;
+    });
+  }
+
   function handleClickPrevPage() {
-    // TODO Page boundary error handling
-    setCurrentPageNo((prev) => prev - 1);
+    if (currentPageNo > 0) {
+      setCurrentPageNo((prev) => prev - 1);
+      setCurrentStep(0);
+    }
   }
 
   function handleClickNextPage() {
-    // TODO Page boundary error handling
-    setCurrentPageNo((prev) => prev + 1);
+    // If not complete, then unravel all before going to next page
+    if (currentStep < readerObject.pages[currentPageNo].shapes.length) {
+      unravelAll();
+    } else if (currentPageNo < readerObject.pages.length - 1) {
+      setCurrentPageNo((prev) => prev + 1);
+      setCurrentStep(0);
+    }
   }
 
   function handleClickPrevStep() {
-    setCurrentStep((prevStep) => {
-      const prevShape =
-        readerObject.pages[currentPageNo].shapeOrder[prevStep - 1];
-      setShapeVisible((prev) => {
-        const newArr = prev.slice();
-        prev[prevShape] = !prev[prevShape];
-        return newArr;
+    if (
+      readerObject.pages[currentPageNo].shapes.length > 0 &&
+      currentStep >= 0
+    ) {
+      setCurrentStep((prevStep) => {
+        const prevShape =
+          readerObject.pages[currentPageNo].shapeOrder[prevStep - 1];
+        setShapeVisible((prev) => {
+          const newArr = prev.slice();
+          newArr[prevShape] = true;
+          return newArr;
+        });
+        return prevStep - 1;
       });
-      return prevStep - 1;
-    });
+    }
   }
 
   function handleClickNextStep() {
-    setCurrentStep((prevStep) => {
-      const prevShape = readerObject.pages[currentPageNo].shapeOrder[prevStep];
-      setShapeVisible((prev) => {
-        const newArr = prev.slice();
-        prev[prevShape] = !prev[prevShape];
-        return newArr;
-      });
+    if (
+      readerObject.pages[currentPageNo].shapes.length > 0 &&
+      currentStep <= readerObject.pages[currentPageNo].shapes.length
+    ) {
+      setCurrentStep((prevStep) => {
+        const prevShape =
+          readerObject.pages[currentPageNo].shapeOrder[prevStep];
+        setShapeVisible((prev) => {
+          const newArr = prev.slice();
+          newArr[prevShape] = false;
+          return newArr;
+        });
 
-      return prevStep + 1;
-    });
+        return prevStep + 1;
+      });
+    }
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    e.preventDefault();
+
+    if (e.key === "ArrowDown") {
+      handleClickNextPage();
+    } else if (e.key === "ArrowUp") {
+      handleClickPrevPage();
+    } else if (e.key === "ArrowRight") {
+      handleClickNextStep();
+    } else if (e.key === "ArrowLeft") {
+      handleClickPrevStep();
+    }
   }
 
   // TODO Add reload capability to failed image load
@@ -120,7 +161,16 @@ export function Reader({
     useState<number>(initialCurrentPage);
   const [shapeVisible, setShapeVisible] = useState<boolean[]>([]);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [chapter, setChapter] = useState<Map<number, PageObject>>(new Map());
   const [image, imageStatus] = useImage(readerObject.pages[currentPageNo].src);
+
+  useEffect(() => {
+    window.addEventListener("keydown", onKeydown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeydown);
+    };
+  }, [currentPageNo, currentStep]);
 
   useEffect(() => {
     // Re-adjust stage dimensions on first render
@@ -147,7 +197,6 @@ export function Reader({
   }, [fit]);
 
   useEffect(() => {
-    // ? Is the intial page's shapes set? Test by setting reader's initialPage to page 2
     setShapeVisible(
       readerObject.pages[currentPageNo].shapes.map((shape) => shape.visible)
     );
@@ -233,7 +282,9 @@ export function Reader({
             onClick={handleClickNextPage}
             disabled={currentPageNo === readerObject.pages.length - 1}
           >
-            Next Page
+            {currentStep < readerObject.pages[currentPageNo].shapes.length
+              ? "Unravel all"
+              : "Next Page"}
           </button>
           <button
             id="nextStep"
