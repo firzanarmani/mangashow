@@ -252,66 +252,99 @@ export function Reader({
   };
 
   return (
-    <div style={{ position: "relative", height: "100%", width: "100%" }}>
-      <div id="controls" className="overlay-controls">
-        <div className="container-controls controls-previous">
-          <button
-            id="previousPage"
-            className="btn-controls btn-page"
-            onClick={handleClickPrevPage}
-            disabled={currentPageNo === 0}
-          >
-            Previous Page
-          </button>
-          <button
-            id="previousStep"
-            className="btn-controls btn-step"
-            onClick={handleClickPrevStep}
-            disabled={
-              readerObject.pages[currentPageNo].shapes.length === 0 ||
-              currentStep === 0
-            }
-          >
-            Previous Step
-          </button>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      <div
+        id="chapter-progress-bar"
+        className="progress-bar"
+        style={{
+          width: (currentPageNo / (readerObject.pages.length - 1)) * 100 + "%",
+        }}
+      ></div>
+      <div
+        style={{
+          position: "relative",
+          height: "100%",
+          width: "100%",
+        }}
+      >
+        <div id="controls" className="overlay-controls">
+          <div className="container-controls controls-previous">
+            <button
+              id="previousPage"
+              className="btn-controls btn-page"
+              onClick={handleClickPrevPage}
+              disabled={currentPageNo === 0}
+            >
+              Previous Page
+            </button>
+            <button
+              id="previousStep"
+              className="btn-controls btn-step"
+              onClick={handleClickPrevStep}
+              disabled={
+                readerObject.pages[currentPageNo].shapes.length === 0 ||
+                currentStep === 0
+              }
+            >
+              Previous Step
+            </button>
+          </div>
+          <div className="container-controls controls-next">
+            <button
+              id="nextPage"
+              className="btn-controls btn-page"
+              onClick={handleClickNextPage}
+              disabled={currentPageNo === readerObject.pages.length - 1}
+            >
+              {currentStep < readerObject.pages[currentPageNo].shapes.length
+                ? "Unravel all"
+                : "Next Page"}
+            </button>
+            <button
+              id="nextStep"
+              className="btn-controls btn-step"
+              onClick={handleClickNextStep}
+              disabled={
+                readerObject.pages[currentPageNo].shapes.length === 0 ||
+                currentStep === readerObject.pages[currentPageNo].shapes.length
+              }
+            >
+              Next Step
+            </button>
+          </div>
         </div>
-        <div className="container-controls controls-next">
-          <button
-            id="nextPage"
-            className="btn-controls btn-page"
-            onClick={handleClickNextPage}
-            disabled={currentPageNo === readerObject.pages.length - 1}
-          >
-            {currentStep < readerObject.pages[currentPageNo].shapes.length
-              ? "Unravel all"
-              : "Next Page"}
-          </button>
-          <button
-            id="nextStep"
-            className="btn-controls btn-step"
-            onClick={handleClickNextStep}
-            disabled={
-              readerObject.pages[currentPageNo].shapes.length === 0 ||
-              currentStep === readerObject.pages[currentPageNo].shapes.length
-            }
-          >
-            Next Step
-          </button>
+        <div
+          id="container"
+          style={{
+            height: `${fit === "fullHeight" ? "100%" : ""}`,
+            width: `${fit === "fullWidth" ? "100%" : ""}`,
+            display: "flex",
+            justifyContent: "center",
+            alignContent: `${fit === "fullWidth" ? "start" : ""}`,
+          }}
+          ref={containerRef}
+        >
+          <ReaderDiv />
         </div>
       </div>
       <div
-        id="container"
+        id="page-progress-bar"
+        className="progress-bar"
         style={{
-          height: `${fit === "fullHeight" ? "100%" : ""}`,
-          width: `${fit === "fullWidth" ? "100%" : ""}`,
-          display: "flex",
-          justifyContent: "center",
-          alignContent: `${fit === "fullWidth" ? "start" : ""}`,
+          width:
+            (currentStep /
+              readerObject.pages[currentPageNo].shapeOrder.length) *
+              100 +
+            "%",
         }}
-        ref={containerRef}
-      >
-        <ReaderDiv />
-      </div>
+      ></div>
     </div>
   );
 }

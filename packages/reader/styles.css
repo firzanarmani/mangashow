@@ -1,3 +1,9 @@
+.progress-bar {
+  height: 3px;
+  background: red;
+  flex: none;
+}
+
 .overlay-controls {
   position: absolute;
   height: 100%;
