@@ -32,7 +32,7 @@ export type PageObject = {
   height: number;
   width: number;
   shapes: Shape[];
-  shapeOrder: number[];
+  shapeOrder: (number | number[])[];
 };
 
 export type ReaderObject = {
@@ -78,7 +78,7 @@ export function Reader({
       setShapeVisible((prev) => {
         return prev.map(() => false);
       });
-      return readerObject.pages[currentPageNo].shapes.length;
+      return readerObject.pages[currentPageNo].shapeOrder.length;
     });
   }
 
@@ -91,7 +91,7 @@ export function Reader({
 
   function handleClickNextPage() {
     // If not complete, then unravel all before going to next page
-    if (currentStep < readerObject.pages[currentPageNo].shapes.length) {
+    if (currentStep < readerObject.pages[currentPageNo].shapeOrder.length) {
       unravelAll();
     } else if (currentPageNo < readerObject.pages.length - 1) {
       setCurrentPageNo((prev) => prev + 1);
@@ -101,7 +101,7 @@ export function Reader({
 
   function handleClickPrevStep() {
     if (
-      readerObject.pages[currentPageNo].shapes.length > 0 &&
+      readerObject.pages[currentPageNo].shapeOrder.length > 0 &&
       currentStep >= 0
     ) {
       setCurrentStep((prevStep) => {
@@ -109,7 +109,11 @@ export function Reader({
           readerObject.pages[currentPageNo].shapeOrder[prevStep - 1];
         setShapeVisible((prev) => {
           const newArr = prev.slice();
-          newArr[prevShape] = true;
+          if (typeof prevShape === "number") {
+            newArr[prevShape] = true;
+          } else {
+            prevShape.forEach((s) => (newArr[s] = true));
+          }
           return newArr;
         });
         return prevStep - 1;
@@ -119,15 +123,19 @@ export function Reader({
 
   function handleClickNextStep() {
     if (
-      readerObject.pages[currentPageNo].shapes.length > 0 &&
-      currentStep <= readerObject.pages[currentPageNo].shapes.length
+      readerObject.pages[currentPageNo].shapeOrder.length > 0 &&
+      currentStep <= readerObject.pages[currentPageNo].shapeOrder.length
     ) {
       setCurrentStep((prevStep) => {
         const prevShape =
           readerObject.pages[currentPageNo].shapeOrder[prevStep];
         setShapeVisible((prev) => {
           const newArr = prev.slice();
-          newArr[prevShape] = false;
+          if (typeof prevShape === "number") {
+            newArr[prevShape] = false;
+          } else {
+            prevShape.forEach((s) => (newArr[s] = false));
+          }
           return newArr;
         });
 
@@ -159,12 +167,12 @@ export function Reader({
       } else if (e.key === "ArrowUp") {
         handleClickPrevPage();
       } else if (e.key === "ArrowRight") {
-        readerObject.pages[currentPageNo].shapes.length === 0 ||
-        currentStep === readerObject.pages[currentPageNo].shapes.length
+        readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
+        currentStep === readerObject.pages[currentPageNo].shapeOrder.length
           ? handleClickNextPage()
           : handleClickNextStep();
       } else if (e.key === "ArrowLeft") {
-        readerObject.pages[currentPageNo].shapes.length === 0 ||
+        readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
         currentStep === 0
           ? handleClickPrevPage()
           : handleClickPrevStep();
@@ -302,21 +310,22 @@ export function Reader({
               id="previousStep"
               className="btn-controls btn-step"
               onClick={
-                readerObject.pages[currentPageNo].shapes.length === 0 ||
+                readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
                 currentStep === 0
                   ? handleClickPrevPage
                   : handleClickPrevStep
               }
               disabled={currentPageNo === 0}
             >
-              {readerObject.pages[currentPageNo].shapes.length === 0 ||
+              {readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
               currentStep === 0
                 ? "Previous Page"
                 : "Previous Step"}
             </button>
           </div>
           <div className="container-controls controls-next">
-            {currentStep < readerObject.pages[currentPageNo].shapes.length ? (
+            {currentStep <
+            readerObject.pages[currentPageNo].shapeOrder.length ? (
               <button
                 id="nextPage"
                 className="btn-controls btn-page"
@@ -330,15 +339,17 @@ export function Reader({
               id="nextStep"
               className="btn-controls btn-step"
               onClick={
-                readerObject.pages[currentPageNo].shapes.length === 0 ||
-                currentStep === readerObject.pages[currentPageNo].shapes.length
+                readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
+                currentStep ===
+                  readerObject.pages[currentPageNo].shapeOrder.length
                   ? handleClickNextPage
                   : handleClickNextStep
               }
               disabled={currentPageNo === readerObject.pages.length - 1}
             >
-              {readerObject.pages[currentPageNo].shapes.length === 0 ||
-              currentStep === readerObject.pages[currentPageNo].shapes.length
+              {readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
+              currentStep ===
+                readerObject.pages[currentPageNo].shapeOrder.length
                 ? "Next Page"
                 : "Next Step"}
             </button>
