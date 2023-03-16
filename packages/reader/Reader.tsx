@@ -283,47 +283,59 @@ export function Reader({
       >
         <div id="controls" className="overlay-controls">
           <div className="container-controls controls-previous">
-            <button
-              id="previousPage"
-              className="btn-controls btn-page"
-              onClick={handleClickPrevPage}
-              disabled={currentPageNo === 0}
-            >
-              Previous Page
-            </button>
+            {currentStep > 0 ? (
+              <button
+                id="previousPage"
+                className="btn-controls btn-page"
+                onClick={handleClickPrevPage}
+                disabled={currentPageNo === 0}
+              >
+                Previous Page
+              </button>
+            ) : null}
             <button
               id="previousStep"
               className="btn-controls btn-step"
-              onClick={handleClickPrevStep}
-              disabled={
+              onClick={
                 readerObject.pages[currentPageNo].shapes.length === 0 ||
                 currentStep === 0
+                  ? handleClickPrevPage
+                  : handleClickPrevStep
               }
+              disabled={currentPageNo === 0}
             >
-              Previous Step
+              {readerObject.pages[currentPageNo].shapes.length === 0 ||
+              currentStep === 0
+                ? "Previous Page"
+                : "Previous Step"}
             </button>
           </div>
           <div className="container-controls controls-next">
-            <button
-              id="nextPage"
-              className="btn-controls btn-page"
-              onClick={handleClickNextPage}
-              disabled={currentPageNo === readerObject.pages.length - 1}
-            >
-              {currentStep < readerObject.pages[currentPageNo].shapes.length
-                ? "Unravel all"
-                : "Next Page"}
-            </button>
+            {currentStep < readerObject.pages[currentPageNo].shapes.length ? (
+              <button
+                id="nextPage"
+                className="btn-controls btn-page"
+                onClick={handleClickNextPage}
+                disabled={currentPageNo === readerObject.pages.length - 1}
+              >
+                Unravel all
+              </button>
+            ) : null}
             <button
               id="nextStep"
               className="btn-controls btn-step"
-              onClick={handleClickNextStep}
-              disabled={
+              onClick={
                 readerObject.pages[currentPageNo].shapes.length === 0 ||
                 currentStep === readerObject.pages[currentPageNo].shapes.length
+                  ? handleClickNextPage
+                  : handleClickNextStep
               }
+              disabled={currentPageNo === readerObject.pages.length - 1}
             >
-              Next Step
+              {readerObject.pages[currentPageNo].shapes.length === 0 ||
+              currentStep === readerObject.pages[currentPageNo].shapes.length
+                ? "Next Page"
+                : "Next Step"}
             </button>
           </div>
         </div>
