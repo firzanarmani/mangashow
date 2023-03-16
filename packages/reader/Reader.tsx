@@ -347,10 +347,12 @@ export function Reader({
           className="progress-bar progress-bar-page"
           style={{
             width:
-              (currentStep /
-                readerObject.pages[currentPageNo].shapeOrder.length) *
-                100 +
-              "%",
+              readerObject.pages[currentPageNo].shapeOrder.length === 0
+                ? "100%"
+                : (currentStep /
+                    readerObject.pages[currentPageNo].shapeOrder.length) *
+                    100 +
+                  "%",
           }}
         ></div>
         <div
