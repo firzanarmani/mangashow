@@ -260,13 +260,20 @@ export function Reader({
         width: "100%",
       }}
     >
-      <div
-        id="chapter-progress-bar"
-        className="progress-bar"
-        style={{
-          width: (currentPageNo / (readerObject.pages.length - 1)) * 100 + "%",
-        }}
-      ></div>
+      <div id="chapter-progress-bar" className="progress-bar-container">
+        <div
+          id="progress-bar-foreground"
+          className="progress-bar progress-bar-chapter"
+          style={{
+            width:
+              (currentPageNo / (readerObject.pages.length - 1)) * 100 + "%",
+          }}
+        ></div>
+        <div
+          id="progress-bar-background"
+          className="progress-bar-background"
+        ></div>
+      </div>
       <div
         style={{
           position: "relative",
@@ -334,17 +341,23 @@ export function Reader({
           <ReaderDiv />
         </div>
       </div>
-      <div
-        id="page-progress-bar"
-        className="progress-bar"
-        style={{
-          width:
-            (currentStep /
-              readerObject.pages[currentPageNo].shapeOrder.length) *
-              100 +
-            "%",
-        }}
-      ></div>
+      <div id="page-progress-bar" className="progress-bar-container">
+        <div
+          id="progress-bar-foreground"
+          className="progress-bar progress-bar-page"
+          style={{
+            width:
+              (currentStep /
+                readerObject.pages[currentPageNo].shapeOrder.length) *
+                100 +
+              "%",
+          }}
+        ></div>
+        <div
+          id="progress-bar-background"
+          className="progress-bar-background"
+        ></div>
+      </div>
     </div>
   );
 }

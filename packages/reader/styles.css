@@ -1,7 +1,29 @@
+.progress-bar-container {
+  height: 3px;
+  width: 100%;
+  flex: none;
+  position: relative;
+}
+
 .progress-bar {
   height: 3px;
-  background: red;
-  flex: none;
+  position: absolute;
+}
+
+.progress-bar-chapter {
+  background: rgb(138, 27, 27);
+  z-index: 1;
+}
+
+.progress-bar-page {
+  background: rgb(28, 28, 159);
+  z-index: 1;
+}
+
+.progress-bar-background {
+  width: 100%;
+  background: grey;
+  z-index: 0;
 }
 
 .overlay-controls {
