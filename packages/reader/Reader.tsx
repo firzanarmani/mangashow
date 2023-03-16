@@ -136,20 +136,6 @@ export function Reader({
     }
   }
 
-  function onKeydown(e: KeyboardEvent) {
-    e.preventDefault();
-
-    if (e.key === "ArrowDown") {
-      handleClickNextPage();
-    } else if (e.key === "ArrowUp") {
-      handleClickPrevPage();
-    } else if (e.key === "ArrowRight") {
-      handleClickNextStep();
-    } else if (e.key === "ArrowLeft") {
-      handleClickPrevStep();
-    }
-  }
-
   // TODO Add reload capability to failed image load
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({
@@ -165,6 +151,25 @@ export function Reader({
   const [image, imageStatus] = useImage(readerObject.pages[currentPageNo].src);
 
   useEffect(() => {
+    function onKeydown(e: KeyboardEvent) {
+      e.preventDefault();
+
+      if (e.key === "ArrowDown") {
+        handleClickNextPage();
+      } else if (e.key === "ArrowUp") {
+        handleClickPrevPage();
+      } else if (e.key === "ArrowRight") {
+        readerObject.pages[currentPageNo].shapes.length === 0 ||
+        currentStep === readerObject.pages[currentPageNo].shapes.length
+          ? handleClickNextPage()
+          : handleClickNextStep();
+      } else if (e.key === "ArrowLeft") {
+        readerObject.pages[currentPageNo].shapes.length === 0 ||
+        currentStep === 0
+          ? handleClickPrevPage()
+          : handleClickPrevStep();
+      }
+    }
     window.addEventListener("keydown", onKeydown);
 
     return () => {
