@@ -271,7 +271,7 @@ export function Reader({
         ></div>
         <div
           id="progress-bar-background"
-          className="progress-bar-background"
+          className="progress-bar progress-bar-background"
         ></div>
       </div>
       <div
@@ -357,7 +357,7 @@ export function Reader({
         ></div>
         <div
           id="progress-bar-background"
-          className="progress-bar-background"
+          className="progress-bar progress-bar-background"
         ></div>
       </div>
     </div>

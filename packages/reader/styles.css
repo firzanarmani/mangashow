@@ -11,12 +11,12 @@
 }
 
 .progress-bar-chapter {
-  background: rgb(138, 27, 27);
+  background: rgb(187, 37, 37);
   z-index: 1;
 }
 
 .progress-bar-page {
-  background: rgb(28, 28, 159);
+  background: rgb(27, 164, 0);
   z-index: 1;
 }
 
