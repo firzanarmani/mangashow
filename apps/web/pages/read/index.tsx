@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
-import ONE_PIECE_CHAPTER_1078 from "./chapter";
+import ONE_PIECE_CHAPTER_1078 from "../../chapter";
 
 // Fix from https://github.com/konvajs/react-konva/issues/588
 const NoSsrReader = dynamic(
@@ -30,8 +30,22 @@ export default function Read(): ReactElement {
             - Chapter {ONE_PIECE_CHAPTER_1078.chapter_number}
           </div>
         </div>
+        {/* <div id="controls" className="flex flex-row w-full justify-center">
+          <button
+            className="bg-white p-4 rounded-full"
+            onClick={() =>
+              setFitSize((prev) =>
+                prev === "fullHeight" ? "fullWidth" : "fullHeight"
+              )
+            }
+          >
+            {fitSize === "fullHeight" ? "Full Height" : "Full Width"}
+          </button>
+        </div> */}
       </div>
       <NoSsrReader readerObject={ONE_PIECE_CHAPTER_1078} />
     </div>
+    // initialCurrentPage={1}
+    // fit="fullWidth"
   );
 }
