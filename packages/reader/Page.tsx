@@ -1,95 +1,98 @@
 import { ReactElement, useEffect, useRef, useState } from "react";
-import { Group, Image, Layer, Stage, Text } from "react-konva";
+import { Image, Layer, Rect, Stage } from "react-konva";
 import useImage from "use-image";
-import { PageObject } from "./Reader";
+import { useReaderContext } from "./context";
+import { LoadingSpinner } from "./LoadingSpinner";
 
-type PageProps = {
-  page: PageObject;
-};
-
-export function Page({ page }: PageProps): ReactElement {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [dimensions, setDimensions] = useState({
-    height: page.height,
-    width: page.width,
-    scale: { x: 1, y: 1 },
-  });
+export function Page(): ReactElement {
+  const {
+    fit,
+    height,
+    width,
+    scale,
+    pageNo,
+    pages,
+    shapeVisible,
+    setDimensions,
+    setShapeVisible,
+  } = useReaderContext((state) => ({
+    fit: state.fit,
+    height: state.height,
+    width: state.width,
+    scale: state.scale,
+    pageNo: state.pageNo,
+    pages: state.pages,
+    shapeVisible: state.shapeVisible,
+    setDimensions: state.setDimensions,
+    setShapeVisible: state.setShapeVisible,
+  }));
+  const [image, imageStatus] = useImage(pages[pageNo].src);
 
   useEffect(() => {
-    function fitStageIntoParentContainer() {
-      if (
-        containerRef.current?.offsetHeight &&
-        containerRef.current?.offsetWidth
-      ) {
-        setDimensions((prev) => {
-          const scale = containerRef.current!.offsetHeight / prev.height;
+    // setShapeVisible(pages[pageNo].shapes.map((shape) => shape.visible));
+    pages[pageNo].shapes.map((shape, index) =>
+      setShapeVisible(index, shape.visible)
+    );
 
-          return {
-            height: prev.height * scale,
-            width: prev.width * scale,
-            scale: { x: scale, y: scale },
-          };
-        });
-      }
+    if (imageStatus === "loaded") {
+      setDimensions(pages[pageNo].height, pages[pageNo].width, { x: 1, y: 1 });
     }
-
-    // Re-adjust stage dimensions on first render
-    fitStageIntoParentContainer();
-
-    window.addEventListener("resize", fitStageIntoParentContainer);
-
-    return () => {
-      window.removeEventListener("resize", fitStageIntoParentContainer);
-    };
-  }, []);
-
-  const [image, imageStatus] = useImage(page.src);
-
-  console.log(imageStatus);
+  }, [pages, pageNo, imageStatus, setDimensions, setShapeVisible]);
 
   if (imageStatus === "loading") {
-    //TODO 'Loading' overlay
     return (
-      <Layer>
-        <Text text="Loading" />
-      </Layer>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <LoadingSpinner />
+        <div style={{ color: "white", fontSize: "0.875rem" }}>Loading page</div>
+      </div>
     );
   }
 
   if (imageStatus === "failed") {
-    //TODO 'Failed' overlay with 'reload' button
     return (
-      <Layer>
-        <Text text="Failed" />
-      </Layer>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div style={{ color: "white", fontSize: "0.875rem" }}>
+          Unable to load page
+        </div>
+      </div>
     );
   }
 
   return (
-    <div
-      id="container"
-      style={{ height: "100vh", justifyContent: "center" }}
-      ref={containerRef}
+    <Stage
+      height={height}
+      width={width}
+      scale={scale}
+      style={{ alignItems: "center" }}
     >
-      <Stage
-        height={dimensions.height}
-        width={dimensions.width}
-        scale={dimensions.scale}
-      >
-        <Layer id="background" listening={false}>
-          <Image
-            image={image}
-            height={dimensions.height}
-            width={dimensions.width}
-            scale={dimensions.scale}
-            listening={false}
-          />
-        </Layer>
+      <Layer id="background" listening={false}>
+        <Image
+          image={image}
+          height={pages[pageNo].height}
+          width={pages[pageNo].width}
+          listening={false}
+        />
+      </Layer>
 
-        <Layer id="shapes"></Layer>
-
-        <Layer id="loadingOverlay" listening={false} />
-      </Stage>
-    </div>
+      <Layer id="shapes">
+        {pages[pageNo].shapes.map((rect, i) => {
+          return <Rect key={i} {...rect} visible={shapeVisible[i]} />;
+        })}
+      </Layer>
+    </Stage>
   );
 }

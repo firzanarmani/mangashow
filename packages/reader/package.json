@@ -8,6 +8,7 @@
     "lint": "eslint *.ts*"
   },
   "devDependencies": {
+    "@tabler/icons-react": "^2.11.0",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
@@ -19,6 +20,7 @@
     "react-konva-utils": "^0.3.2",
     "tsconfig": "workspace:*",
     "typescript": "^4.5.2",
-    "use-image": "github:firzanarmani/use-image"
+    "use-image": "github:firzanarmani/use-image",
+    "zustand": "^4.3.6"
   }
 }

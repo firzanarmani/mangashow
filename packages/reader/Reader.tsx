@@ -1,393 +1,100 @@
-import {
-  type ReactElement,
-  useState,
-  useEffect,
-  useRef,
-  Dispatch,
-  SetStateAction,
-} from "react";
-import { Layer, Image, Stage, Rect } from "react-konva";
-import useImage from "use-image";
+import { type ReactElement, useEffect, useRef } from "react";
 import "./styles.css";
+import { useReaderContext } from "./context";
+import { PageObject } from "./types";
+import { Page } from "./Page";
 
-//TODO Mousewheel to zoom functionality - https://konvajs.org/docs/sandbox/Zooming_Relative_To_Pointer.html`
-export type Shape = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation?: number;
-  fill: string;
-  stroke?: string;
-  strokeWidth?: number;
-  name: string;
-  visible: boolean;
-  id: string;
-};
-
-export type PageObject = {
-  pageNo: number;
-  src: string;
-  alt: string;
-  height: number;
-  width: number;
-  shapes: Shape[];
-  shapeOrder: (number | number[])[];
-};
-
-export type ReaderObject = {
-  series_title: string;
-  chapter_number: number;
-  source: string;
-  pages: PageObject[];
-};
-
-export type ReaderProps = {
-  readerObject: ReaderObject;
-  initialCurrentPage?: number;
-  fit?: "fullWidth" | "fullHeight";
-};
-
-export function Reader({
-  readerObject,
-  initialCurrentPage = 0,
-  fit = "fullHeight",
-}: ReaderProps): ReactElement {
-  function fitStageIntoParentContainer(
-    container: HTMLDivElement,
-    page: PageObject
-  ) {
-    if (container.offsetHeight && container.offsetWidth) {
-      setDimensions(() => {
-        const scale =
-          fit === "fullHeight"
-            ? container.offsetHeight / page.height
-            : container.offsetWidth / page.width;
-
-        return {
-          height: page.height * scale,
-          width: page.width * scale,
-          scale: { x: scale, y: scale },
-        };
-      });
-    }
-  }
-
-  function unravelAll() {
-    setCurrentStep((prevStep) => {
-      setShapeVisible((prev) => {
-        return prev.map(() => false);
-      });
-      return readerObject.pages[currentPageNo].shapeOrder.length;
-    });
-  }
-
-  function handleClickPrevPage() {
-    if (currentPageNo > 0) {
-      setCurrentPageNo((prev) => prev - 1);
-      setCurrentStep(0);
-    }
-  }
-
-  function handleClickNextPage() {
-    // If not complete, then unravel all before going to next page
-    if (currentStep < readerObject.pages[currentPageNo].shapeOrder.length) {
-      unravelAll();
-    } else if (currentPageNo < readerObject.pages.length - 1) {
-      setCurrentPageNo((prev) => prev + 1);
-      setCurrentStep(0);
-    }
-  }
-
-  function handleClickPrevStep() {
-    if (
-      readerObject.pages[currentPageNo].shapeOrder.length > 0 &&
-      currentStep >= 0
-    ) {
-      setCurrentStep((prevStep) => {
-        const prevShape =
-          readerObject.pages[currentPageNo].shapeOrder[prevStep - 1];
-        setShapeVisible((prev) => {
-          const newArr = prev.slice();
-          if (typeof prevShape === "number") {
-            newArr[prevShape] = true;
-          } else {
-            prevShape.forEach((s) => (newArr[s] = true));
-          }
-          return newArr;
-        });
-        return prevStep - 1;
-      });
-    }
-  }
-
-  function handleClickNextStep() {
-    if (
-      readerObject.pages[currentPageNo].shapeOrder.length > 0 &&
-      currentStep <= readerObject.pages[currentPageNo].shapeOrder.length
-    ) {
-      setCurrentStep((prevStep) => {
-        const prevShape =
-          readerObject.pages[currentPageNo].shapeOrder[prevStep];
-        setShapeVisible((prev) => {
-          const newArr = prev.slice();
-          if (typeof prevShape === "number") {
-            newArr[prevShape] = false;
-          } else {
-            prevShape.forEach((s) => (newArr[s] = false));
-          }
-          return newArr;
-        });
-
-        return prevStep + 1;
-      });
-    }
-  }
-
-  // TODO Add reload capability to failed image load
+export function Reader(): ReactElement {
+  const { fit, pageNo, pages, setDimensions } = useReaderContext((state) => ({
+    fit: state.fit,
+    pageNo: state.pageNo,
+    pages: state.pages,
+    setDimensions: state.setDimensions,
+  }));
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [dimensions, setDimensions] = useState({
-    height: 0,
-    width: 0,
-    scale: { x: 1, y: 1 },
-  });
-  const [currentPageNo, setCurrentPageNo] =
-    useState<number>(initialCurrentPage);
-  const [shapeVisible, setShapeVisible] = useState<boolean[]>([]);
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [chapter, setChapter] = useState<Map<number, PageObject>>(new Map());
-  const [image, imageStatus] = useImage(readerObject.pages[currentPageNo].src);
 
   useEffect(() => {
-    function onKeydown(e: KeyboardEvent) {
-      e.preventDefault();
+    function fitStageIntoParentContainer(
+      container: HTMLDivElement,
+      page: PageObject
+    ) {
+      // TODO Change pages[pageNo] dimensions to use store dimensions?
+      if (container && container.offsetHeight && container.offsetWidth) {
+        // fitScreen
+        let scale = Math.min(
+          container.offsetHeight / page.height,
+          container.offsetWidth / page.width
+        );
 
-      if (e.key === "ArrowDown") {
-        handleClickNextPage();
-      } else if (e.key === "ArrowUp") {
-        handleClickPrevPage();
-      } else if (e.key === "ArrowRight") {
-        readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
-        currentStep === readerObject.pages[currentPageNo].shapeOrder.length
-          ? handleClickNextPage()
-          : handleClickNextStep();
-      } else if (e.key === "ArrowLeft") {
-        readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
-        currentStep === 0
-          ? handleClickPrevPage()
-          : handleClickPrevStep();
+        if (fit === "fullHeight") {
+          scale = container.offsetHeight / page.height;
+        } else if (fit === "fullWidth") {
+          scale = container.offsetWidth / page.width;
+        }
+
+        setDimensions(page.height * scale, page.width * scale, {
+          x: scale,
+          y: scale,
+        });
       }
     }
-    window.addEventListener("keydown", onKeydown);
 
-    return () => {
-      window.removeEventListener("keydown", onKeydown);
-    };
-  }, [currentPageNo, currentStep]);
-
-  useEffect(() => {
+    const tempRef = containerRef.current!;
     // Re-adjust stage dimensions on first render
-    fitStageIntoParentContainer(
-      containerRef.current!,
-      readerObject.pages[currentPageNo]
-    );
+    fitStageIntoParentContainer(tempRef, pages[pageNo]);
 
+    // Attach resize listener
     window.addEventListener("resize", () =>
-      fitStageIntoParentContainer(
-        containerRef.current!,
-        readerObject.pages[currentPageNo]
-      )
+      fitStageIntoParentContainer(tempRef, pages[pageNo])
     );
 
+    // Cleanup resize listener
     return () => {
       window.removeEventListener("resize", () =>
-        fitStageIntoParentContainer(
-          containerRef.current!,
-          readerObject.pages[currentPageNo]
-        )
+        fitStageIntoParentContainer(tempRef, pages[pageNo])
       );
     };
-  }, [fit]);
+  }, [fit, pages, pageNo, setDimensions]);
 
-  useEffect(() => {
-    setShapeVisible(
-      readerObject.pages[currentPageNo].shapes.map((shape) => shape.visible)
-    );
-
-    if (imageStatus === "loaded") {
-      setDimensions({
-        height: readerObject.pages[currentPageNo].height,
-        width: readerObject.pages[currentPageNo].width,
-        scale: { x: 1, y: 1 },
-      });
+  const fitStyles = ({
+    fitType,
+  }: {
+    fitType: typeof fit;
+  }): {
+    height?: string;
+    width?: string;
+    alignItems?: string;
+  } => {
+    if (fitType === "fullWidth") {
+      return {
+        width: "100%",
+        alignItems: "",
+      };
+    } else if (fitType === "fullHeight") {
+      return {
+        height: "100%",
+        alignItems: "start",
+      };
     }
 
-    fitStageIntoParentContainer(
-      containerRef.current!,
-      readerObject.pages[currentPageNo]
-    );
-  }, [currentPageNo]);
-
-  const ReaderDiv = () => {
-    if (imageStatus === "loading") {
-      return <div style={{ color: "white" }}>Loading page</div>;
-    }
-
-    if (imageStatus === "failed") {
-      return <div style={{ color: "white" }}>Unable to load page</div>;
-    }
-
-    return (
-      <Stage
-        height={dimensions.height}
-        width={dimensions.width}
-        scale={dimensions.scale}
-        style={{ alignItems: "center" }}
-      >
-        <Layer id="background" listening={false}>
-          <Image
-            image={image}
-            height={readerObject.pages[currentPageNo].height}
-            width={readerObject.pages[currentPageNo].width}
-            listening={false}
-          />
-        </Layer>
-
-        <Layer id="shapes">
-          {readerObject.pages[currentPageNo].shapes.map((rect, i) => {
-            return <Rect key={i} {...rect} visible={shapeVisible[i]} />;
-          })}
-        </Layer>
-
-        <Layer id="loadingOverlay" listening={false} />
-      </Stage>
-    );
+    return {
+      height: "100%",
+      width: "100%",
+      alignItems: "center",
+    };
   };
 
   return (
     <div
+      id="container"
       style={{
         display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        width: "100%",
+        justifyContent: "center",
+        ...fitStyles({ fitType: fit }),
       }}
+      ref={containerRef}
     >
-      <div id="chapter-progress-bar" className="progress-bar-container">
-        <div
-          id="progress-bar-foreground"
-          className="progress-bar progress-bar-chapter"
-          style={{
-            width:
-              (currentPageNo / (readerObject.pages.length - 1)) * 100 + "%",
-          }}
-        ></div>
-        <div
-          id="progress-bar-background"
-          className="progress-bar progress-bar-background"
-        ></div>
-      </div>
-      <div
-        style={{
-          position: "relative",
-          height: "100%",
-          width: "100%",
-        }}
-      >
-        <div id="controls" className="overlay-controls">
-          <div className="container-controls controls-previous">
-            {currentStep > 0 ? (
-              <button
-                id="previousPage"
-                className="btn-controls btn-page"
-                onClick={handleClickPrevPage}
-                disabled={currentPageNo === 0}
-              >
-                Previous Page
-              </button>
-            ) : null}
-            <button
-              id="previousStep"
-              className="btn-controls btn-step"
-              onClick={
-                readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
-                currentStep === 0
-                  ? handleClickPrevPage
-                  : handleClickPrevStep
-              }
-              disabled={currentPageNo === 0}
-            >
-              {readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
-              currentStep === 0
-                ? "Previous Page"
-                : "Previous Step"}
-            </button>
-          </div>
-          <div className="container-controls controls-next">
-            {currentStep <
-            readerObject.pages[currentPageNo].shapeOrder.length ? (
-              <button
-                id="nextPage"
-                className="btn-controls btn-page"
-                onClick={handleClickNextPage}
-                disabled={currentPageNo === readerObject.pages.length - 1}
-              >
-                Unravel all
-              </button>
-            ) : null}
-            <button
-              id="nextStep"
-              className="btn-controls btn-step"
-              onClick={
-                readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
-                currentStep ===
-                  readerObject.pages[currentPageNo].shapeOrder.length
-                  ? handleClickNextPage
-                  : handleClickNextStep
-              }
-              disabled={currentPageNo === readerObject.pages.length - 1}
-            >
-              {readerObject.pages[currentPageNo].shapeOrder.length === 0 ||
-              currentStep ===
-                readerObject.pages[currentPageNo].shapeOrder.length
-                ? "Next Page"
-                : "Next Step"}
-            </button>
-          </div>
-        </div>
-        <div
-          id="container"
-          style={{
-            height: `${fit === "fullHeight" ? "100%" : ""}`,
-            width: `${fit === "fullWidth" ? "100%" : ""}`,
-            display: "flex",
-            justifyContent: "center",
-            alignContent: `${fit === "fullWidth" ? "start" : ""}`,
-          }}
-          ref={containerRef}
-        >
-          <ReaderDiv />
-        </div>
-      </div>
-      <div id="page-progress-bar" className="progress-bar-container">
-        <div
-          id="progress-bar-foreground"
-          className="progress-bar progress-bar-page"
-          style={{
-            width:
-              readerObject.pages[currentPageNo].shapeOrder.length === 0
-                ? "100%"
-                : (currentStep /
-                    readerObject.pages[currentPageNo].shapeOrder.length) *
-                    100 +
-                  "%",
-          }}
-        ></div>
-        <div
-          id="progress-bar-background"
-          className="progress-bar progress-bar-background"
-        ></div>
-      </div>
+      <Page />
     </div>
   );
 }
