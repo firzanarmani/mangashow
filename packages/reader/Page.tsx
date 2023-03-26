@@ -29,7 +29,6 @@ export function Page(): ReactElement {
   const [image, imageStatus] = useImage(pages[pageNo].src);
 
   useEffect(() => {
-    // setShapeVisible(pages[pageNo].shapes.map((shape) => shape.visible));
     pages[pageNo].shapes.map((shape, index) =>
       setShapeVisible(index, shape.visible)
     );
@@ -37,7 +36,7 @@ export function Page(): ReactElement {
     if (imageStatus === "loaded") {
       setDimensions(pages[pageNo].height, pages[pageNo].width, { x: 1, y: 1 });
     }
-  }, [pages, pageNo, imageStatus, setDimensions, setShapeVisible]);
+  }, [pages, pageNo]);
 
   if (imageStatus === "loading") {
     return (
