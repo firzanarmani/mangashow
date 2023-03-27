@@ -29,7 +29,7 @@ export default function Read(): ReactElement {
     >
       <div
         id="page-container"
-        className="h-screen bg-black flex flex-col justify-center relative"
+        className="inset-0 bg-black flex flex-col justify-center absolute"
       >
         <div className="w-full flex-0">
           <Header />
