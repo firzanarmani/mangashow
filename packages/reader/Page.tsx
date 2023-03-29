@@ -12,6 +12,7 @@ export function Page(): ReactElement {
     scale,
     pageNo,
     pages,
+    zoomScale,
     shapeVisible,
     setDimensions,
     setShapeVisible,
@@ -22,6 +23,7 @@ export function Page(): ReactElement {
     scale: state.scale,
     pageNo: state.pageNo,
     pages: state.pages,
+    zoomScale: state.zoomScale,
     shapeVisible: state.shapeVisible,
     setDimensions: state.setDimensions,
     setShapeVisible: state.setShapeVisible,
@@ -73,21 +75,19 @@ export function Page(): ReactElement {
 
   return (
     <Stage
-      height={height}
-      width={width}
-      scale={scale}
-      style={{ alignItems: "center" }}
+      height={height * (zoomScale / 100)}
+      width={width * (zoomScale / 100)}
+      scale={{ x: scale.x * (zoomScale / 100), y: scale.y * (zoomScale / 100) }}
     >
       <Layer id="background" listening={false}>
         <Image
           image={image}
           height={pages[pageNo].height}
           width={pages[pageNo].width}
-          listening={false}
         />
       </Layer>
 
-      <Layer id="shapes">
+      <Layer id="shapes" listening={false}>
         {pages[pageNo].shapes.map((rect, i) => {
           return <Rect key={i} {...rect} visible={shapeVisible[i]} />;
         })}

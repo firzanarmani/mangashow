@@ -65,6 +65,8 @@ export function Reader(): ReactElement {
     width?: string;
     alignItems?: string;
   } => {
+    const fullHeight = "calc(100dvh - 3rem - 4.5rem)";
+
     if (fitType === "fullWidth") {
       return {
         width: "100%",
@@ -72,15 +74,14 @@ export function Reader(): ReactElement {
       };
     } else if (fitType === "fullHeight") {
       return {
-        height: "100%",
+        height: fullHeight,
         alignItems: "start",
       };
     }
 
     return {
-      height: "100%",
-      width: "100%",
-      alignItems: "center",
+      height: fullHeight,
+      width: "100vw",
     };
   };
 
@@ -89,7 +90,7 @@ export function Reader(): ReactElement {
       id="container"
       style={{
         display: "flex",
-        justifyContent: "center",
+        overflow: "auto",
         ...fitStyles({ fitType: fit }),
       }}
       ref={containerRef}

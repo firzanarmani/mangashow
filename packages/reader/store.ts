@@ -7,6 +7,7 @@ type ReaderSlice = {
   width: number;
   scale: { x: number; y: number };
   pageNo: number;
+  zoomScale: number;
   setFit: (fit: ReaderSlice["fit"]) => void;
   setDimensions: (
     height: ReaderSlice["height"],
@@ -17,6 +18,7 @@ type ReaderSlice = {
   nextPage: () => void;
   setPageNo: (pageNo: ReaderSlice["pageNo"]) => void;
   goToPage: (pageNo: ReaderSlice["pageNo"]) => void;
+  setZoomScale: (number: ReaderSlice["zoomScale"]) => void;
 };
 
 const createReaderSlice: StateCreator<ReaderSlice, [], [], ReaderSlice> = (
@@ -27,6 +29,7 @@ const createReaderSlice: StateCreator<ReaderSlice, [], [], ReaderSlice> = (
   width: 0,
   scale: { x: 1, y: 1 },
   pageNo: 0,
+  zoomScale: 100,
   setFit: (fit) => set((state) => ({ fit })),
   setDimensions: (height, width, scale) =>
     set((state) => ({ height, width, scale })),
@@ -34,6 +37,7 @@ const createReaderSlice: StateCreator<ReaderSlice, [], [], ReaderSlice> = (
   nextPage: () => set((state) => ({ pageNo: state.pageNo + 1 })),
   setPageNo: (pageNo) => set((state) => ({ pageNo })),
   goToPage: (pageNo) => set((state) => ({ pageNo })),
+  setZoomScale: (zoomScale) => set((state) => ({ zoomScale })),
 });
 
 export type ChapterSlice = {
