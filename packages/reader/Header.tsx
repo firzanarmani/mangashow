@@ -59,5 +59,3 @@ export function Header(): ReactElement {
     </div>
   );
 }
-
-// If not loaded do not allow navigation (or just steps)
