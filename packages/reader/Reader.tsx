@@ -5,12 +5,15 @@ import { PageObject } from "./types";
 import { Page } from "./Page";
 
 export function Reader(): ReactElement {
-  const { fit, pageNo, pages, setDimensions } = useReaderContext((state) => ({
-    fit: state.fit,
-    pageNo: state.pageNo,
-    pages: state.pages,
-    setDimensions: state.setDimensions,
-  }));
+  const { fit, pageNo, pages, setDimensions, setStageSize } = useReaderContext(
+    (state) => ({
+      fit: state.fit,
+      pageNo: state.pageNo,
+      pages: state.pages,
+      setDimensions: state.setDimensions,
+      setStageSize: state.setStageSize,
+    })
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -18,8 +21,11 @@ export function Reader(): ReactElement {
       container: HTMLDivElement,
       page: PageObject
     ) {
-      // TODO Change pages[pageNo] dimensions to use store dimensions?
       if (container && container.offsetHeight && container.offsetWidth) {
+        setStageSize({
+          height: container.offsetHeight,
+          width: container.offsetWidth,
+        });
         // fitScreen
         let scale = Math.min(
           container.offsetHeight / page.height,
@@ -64,6 +70,7 @@ export function Reader(): ReactElement {
     height?: string;
     width?: string;
     alignItems?: string;
+    justifyContent?: string;
   } => {
     const fullHeight = "calc(100dvh - 3rem - 4.5rem)";
 
@@ -82,6 +89,8 @@ export function Reader(): ReactElement {
     return {
       height: fullHeight,
       width: "100vw",
+      alignItems: "center",
+      justifyContent: "center",
     };
   };
 
@@ -90,7 +99,8 @@ export function Reader(): ReactElement {
       id="container"
       style={{
         display: "flex",
-        overflow: "auto",
+        // position: "absolute",
+        overflow: "hidden",
         ...fitStyles({ fitType: fit }),
       }}
       ref={containerRef}

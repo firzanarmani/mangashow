@@ -3,14 +3,11 @@ import { ReactElement } from "react";
 import { useReaderContext } from "./context";
 
 export function Header(): ReactElement {
-  const { series, chapterNumber, zoomScale, setZoomScale } = useReaderContext(
-    (state) => ({
-      series: state.series,
-      chapterNumber: state.chapterNumber,
-      zoomScale: state.zoomScale,
-      setZoomScale: state.setZoomScale,
-    })
-  );
+  const { series, chapterNumber } = useReaderContext((state) => ({
+    series: state.series,
+    chapterNumber: state.chapterNumber,
+    zoomScale: state.zoomScale,
+  }));
 
   return (
     <div
@@ -25,24 +22,9 @@ export function Header(): ReactElement {
     >
       <div
         style={{
-          height: "2rem",
-          width: "2rem",
           display: "flex",
-          alignItems: "center",
         }}
-      >
-        <input
-          id="zoomSlider"
-          type="range"
-          min="100"
-          max="200"
-          value={zoomScale}
-          style={{ width: "70px" }}
-          onChange={(e) => {
-            setZoomScale(parseInt(e.target.value));
-          }}
-        />
-      </div>
+      ></div>
       <div
         style={{ color: "white", fontWeight: "normal" }}
       >{`${series} - Chapter ${chapterNumber}`}</div>
