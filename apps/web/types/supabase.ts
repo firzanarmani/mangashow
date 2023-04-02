@@ -9,9 +9,29 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      chapters: {
+      Chapters: {
         Row: {
-          chapter_no: number | null;
+          chapter_no: number;
+          created_at: string | null;
+          id: number;
+          series_id: number;
+        };
+        Insert: {
+          chapter_no: number;
+          created_at?: string | null;
+          id?: number;
+          series_id: number;
+        };
+        Update: {
+          chapter_no?: number;
+          created_at?: string | null;
+          id?: number;
+          series_id?: number;
+        };
+      };
+      ChapterShows: {
+        Row: {
+          chapter_id: number | null;
           created_at: string | null;
           createdBy: string | null;
           id: number;
@@ -21,7 +41,7 @@ export interface Database {
           updated_at: string | null;
         };
         Insert: {
-          chapter_no?: number | null;
+          chapter_id?: number | null;
           created_at?: string | null;
           createdBy?: string | null;
           id?: number;
@@ -31,7 +51,7 @@ export interface Database {
           updated_at?: string | null;
         };
         Update: {
-          chapter_no?: number | null;
+          chapter_id?: number | null;
           created_at?: string | null;
           createdBy?: string | null;
           id?: number;
@@ -41,7 +61,7 @@ export interface Database {
           updated_at?: string | null;
         };
       };
-      profiles: {
+      Profiles: {
         Row: {
           avatar_url: string | null;
           full_name: string | null;
@@ -67,7 +87,7 @@ export interface Database {
           website?: string | null;
         };
       };
-      series: {
+      Series: {
         Row: {
           author: string | null;
           created_at: string | null;

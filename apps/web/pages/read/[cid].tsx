@@ -62,16 +62,18 @@ export const getServerSideProps: GetServerSideProps<{
     return { notFound: true };
   }
 
-  type ChaptersType = Database["public"]["Tables"]["chapters"]["Row"];
+  type ChapterShowsType = Database["public"]["Tables"]["ChapterShows"]["Row"];
 
   const { data } = await supabase
-    .from("chapters")
-    .select("*, series(title)")
+    .from("ChapterShows")
+    .select("*, Series(title), Chapters(chapter_no)")
     .eq("id", cid)
     .limit(1)
     .single<
-      ChaptersType & {
-        series: { title: string };
+      ChapterShowsType & {
+        Series: { title: string };
+      } & {
+        Chapters: { chapter_no: number };
       }
     >();
 
@@ -82,8 +84,8 @@ export const getServerSideProps: GetServerSideProps<{
   return {
     props: {
       data: {
-        series_title: data.series.title,
-        chapter_number: data.chapter_no!,
+        series_title: data.Series.title,
+        chapter_number: data.Chapters.chapter_no,
         source: "TCB Scans",
         pages: data.shapes as PageObject[],
       },
