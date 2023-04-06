@@ -1,7 +1,7 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { Stage as StageType } from "konva/lib/Stage";
 import { Layer as LayerType } from "konva/lib/Layer";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import { Group, Image, Layer, Rect, Stage } from "react-konva";
 import useImage from "use-image";
 import { useReaderContext } from "./context";
@@ -50,6 +50,28 @@ export function Page(): ReactElement {
       setDimensions(pages[pageNo].height, pages[pageNo].width, { x: 1, y: 1 });
     }
   }, [pages, pageNo]);
+
+  const groupRef = useCallback(
+    (group: LayerType) => {
+      if (group === null) return;
+
+      const stage = group.getStage();
+
+      group.x(
+        stage.width() / 2 - group.getClientRect().width / (zoomScale / 100) / 2
+      );
+      group.y(
+        stage.height() / 2 -
+          group.getClientRect().height / (zoomScale / 100) / 2
+      );
+      group.scale({
+        x: scale.x * (zoomScale / 100),
+        y: scale.y * (zoomScale / 100),
+      });
+      setZoomScale(100);
+    },
+    [pages, pageNo]
+  );
 
   function getDistance(
     p1: { x: number; y: number },
@@ -217,6 +239,7 @@ export function Page(): ReactElement {
         onDragMove={onDragMove}
         onPointerDblClick={onDblTap}
         style={{ touchAction: "none" }}
+        ref={groupRef}
       >
         <Image
           image={image}
