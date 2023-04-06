@@ -16,7 +16,7 @@ export default function Home() {
             <div className="space-y-8">
               <div className="max-w-3xl text-center mx-auto">
                 <h1 className="block font-thin text-gray-200 text-4xl sm:text-5xl md:text-6xl lg:text-7xl">
-                  Read <b className="font-extrabold">manga</b> like {`you're`}
+                  Read <b className="font-extrabold">manga</b> like {`you're `}
                   watching a <b className="font-extrabold">show</b>
                 </h1>
               </div>
